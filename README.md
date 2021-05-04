@@ -13,7 +13,7 @@ BackupFrom: Path from where it will copy the files
 
 BackupTo: Path where it will put the .tar.gz backup
 
-Duration: For example, if you enter -24h, the program will delete all backups that were created more than 24 hours ago
+Duration (optional): For example, if you enter -24h, the program will delete all backups that were created more than 24 hours ago
 
 ### More info about duration
 
