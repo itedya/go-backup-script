@@ -27,13 +27,18 @@ func RunCMD(path string, args []string) (out string, err error) {
 }
 
 func parseTerminalArguments() (string, string, string, error) {
-	if len(os.Args) != 4 {
-		return "", "", "", errors.New("Specify 2 arguments! Backup From, Backup To and Duration")
+	if len(os.Args) != 4 && len(os.Args) != 3 {
+		return "", "", "", errors.New("Specify 2 or 3 arguments! Backup From, Backup To and Duration (optional)")
 	}
 
 	backupFrom := os.Args[1]
 	backupTo := os.Args[2]
-	duration := os.Args[3]
+	var duration string
+	if len(os.Args) == 3 {
+		duration = ""
+	} else {
+		duration = os.Args[3]
+	}
 
 	if _, err := os.Stat(backupFrom); os.IsNotExist(err) {
 		return "", "", "", errors.New("Backup from path doesn't exist!")

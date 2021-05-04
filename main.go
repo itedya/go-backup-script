@@ -27,10 +27,12 @@ func main() {
 		return
 	}
 
-	err = removeOldFiles(backupTo, duration)
-	if err != nil {
-		log.Fatal(err)
-		return
+	if duration != "" {
+		err = removeOldFiles(backupTo, duration)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 	}
 
 	return
