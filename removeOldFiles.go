@@ -22,7 +22,7 @@ func removeOldFiles(backupTo string, duration string) error {
 		return errors.New("can't parse date")
 	}
 
-	timeToRemove, err := time.Parse("2006-01-02T15:04:05", strings.Split(time.Now().Add(durationParsed).Format(time.RFC3339), "+")[0])
+	timeToRemove, err := time.Parse("2006-01-02-15-04-05", time.Now().Add(durationParsed).Format("2006-01-02-15-04-05"))
 	if err != nil {
 		return errors.New("can't parse date")
 	}
@@ -30,9 +30,8 @@ func removeOldFiles(backupTo string, duration string) error {
 	for _, file := range files {
 		fileBase := filepath.Base(file)
 		fileBase = strings.Replace(fileBase, "_backup.tar.gz", "", -1)
-		fileBase = strings.Replace(fileBase, ".", ":", -1)
 
-		fileTime, err := time.Parse("2006-01-02T15:04:05", fileBase)
+		fileTime, err := time.Parse("2006-01-02-15-04-05", fileBase)
 		if err == nil {
 			filesToCheck[len(filesToCheck)] = file
 

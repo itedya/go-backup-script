@@ -2,58 +2,52 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"os/exec"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
-func RunCMD(path string, args []string) (out string, err error) {
-	fmt.Println("Executing command...")
-	cmd := exec.Command(path, args...)
-
-	var b []byte
-	b, err = cmd.CombinedOutput()
-	out = string(b)
-
-	if err != nil {
-		fmt.Println("Executed command \"" + strings.Join(cmd.Args[:], " ") + "\" with error!")
-		return "", errors.New(out)
-	} else {
-		fmt.Println("Executed command \"" + strings.Join(cmd.Args[:], " ") + "\" successfully!")
+func filterPath(path string) (string, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return "", errors.New("backup from path doesn't exist")
 	}
 
-	return out, nil
+	path = strings.ReplaceAll(path, "/", string(filepath.Separator))
+	path = strings.ReplaceAll(path, "\\", string(filepath.Separator))
+
+	if !strings.HasSuffix(path, string(filepath.Separator)) {
+		path += string(filepath.Separator)
+	}
+
+	return path, nil
 }
 
 func parseTerminalArguments() (string, string, string, error) {
 	if len(os.Args) != 4 && len(os.Args) != 3 {
-		return "", "", "", errors.New("Specify 2 or 3 arguments! Backup From, Backup To and Duration (optional)")
+		return "", "", "", errors.New("specify 2 or 3 arguments: backup from, backup to and duration (optional)")
 	}
 
-	backupFrom := os.Args[1]
-	backupTo := os.Args[2]
+	backupFrom, err := filterPath(os.Args[1])
+	if err != nil {
+		return "", "", "", err
+	}
+	backupFrom = backupFrom[:len(backupFrom)-1]
+
+	backupTo, err := filterPath(os.Args[2])
+	if err != nil {
+		return "", "", "", err
+	}
+
 	var duration string
 	if len(os.Args) == 3 {
 		duration = ""
 	} else {
 		duration = os.Args[3]
-	}
-
-	if _, err := os.Stat(backupFrom); os.IsNotExist(err) {
-		return "", "", "", errors.New("Backup from path doesn't exist!")
-	}
-
-	if _, err := os.Stat(backupTo); os.IsNotExist(err) {
-		return "", "", "", errors.New("Backup to path doesn't exist!")
-	}
-
-	if backupFrom[len(backupFrom)-1] != 92 && backupFrom[len(backupFrom)-1] != 47 {
-		backupFrom += "/"
-	}
-
-	if backupTo[len(backupTo)-1] != 92 && backupTo[len(backupTo)-1] != 47 {
-		backupTo += "/"
+		_, err = time.ParseDuration(duration)
+		if err != nil {
+			return "", "", "", errors.New("can't parse duration")
+		}
 	}
 
 	return backupFrom, backupTo, duration, nil
